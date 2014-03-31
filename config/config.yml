@@ -1,0 +1,13 @@
+development:
+ host: localhost
+
+production:
+ host: api.bluetrain.io
+
+paths:
+ sign_in: /users/sign_in.json
+ create_plt: /presentation_layer_templates
+ update_plt: /presentation_layer_templates
+ delete_plt: /presentation_layer_templates
+ get_plt: /presentation_layer_templates.json
+ get_websites: /users/websites.json
