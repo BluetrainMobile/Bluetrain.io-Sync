@@ -105,9 +105,9 @@ class Bluetrain < Thor
 
 					# Determine if the file exists remotely, if so PUT else POST
 					unless templates.index(file).nil?
-						@bt_net.update(file, '', bfh.content, 'include')
+						@bt_net.update(file, '', bfh.body_content, 'include')
 					else
-						@bt_net.create(file, '', bfh.content, 'include')
+						@bt_net.create(file, '', bfh.body_content, 'include')
 					end
 				end
 			end	
