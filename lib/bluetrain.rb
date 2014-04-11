@@ -23,22 +23,24 @@ class Bluetrain < Thor
 		connect
 
 		# Define the listening process
-		listener = Listen.to(directory) do |modified, added, removed|
+		listener = Listen.to(directory, polling_fallback_message: false) do |modified, added, removed|
 		  unless modified.empty?
 		  	modified.each do |file| 
 		  		bfh = BluetrainFileHelper.new(file)
-		  		@bt_net.update(File.basename(file, '.*'), bfh.head_content, bfh.body_content)
+		  		puts file
+		  		@bt_net.update(bfh.name, bfh.head_content, bfh.body_content, bfh.kind)
 		  	end
 		  end
 		  unless added.empty?
 		  	added.each do |file| 
 		  		bfh = BluetrainFileHelper.new(file)
-		  		@bt_net.create(File.basename(file, '.*'), bfh.head_content, bfh.body_content)
+		  		puts file
+		  		@bt_net.create(bfh.name, bfh.head_content, bfh.body_content, bfh.kind)
 		  	end
 		  end
 		  unless removed.empty?
 		  	removed.each do |file| 
-		  		@bt_net.delete(File.basename(file, '.*'))
+		  		@bt_net.delete(bfh.name)
 		  	end
 		  end
 		end
@@ -81,16 +83,31 @@ class Bluetrain < Thor
 			templates = JSON.parse template_json
 			templates.collect! {|template| template['presentation_layer_template']['title']}
 
+			# Templates
 			# For each file in the specified directory (which ends in .html)
-			Dir.chdir(directory) do 
+			Dir.chdir("#{directory}/templates") do 
 				Dir.glob('*.html').each do |file|
 					bfh = BluetrainFileHelper.new(file)
 
 					# Determine if the file exists remotely, if so PUT else POST
-					unless templates.index File.basename(file, '.*').nil?
-						@bt_net.update(File.basename(file, '.*'), bfh.head_content, bfh.body_content)
+					unless templates.index(File.basename(file, '.*')).nil?
+						@bt_net.update(File.basename(file, '.*'), bfh.head_content, bfh.body_content, 'template')
 					else
-						@bt_net.create(File.basename(file, '.*'), bfh.head_content, bfh.body_content)
+						@bt_net.create(File.basename(file, '.*'), bfh.head_content, bfh.body_content, 'template')
+					end
+				end
+			end	
+
+			# Includes
+			Dir.chdir("#{directory}/includes") do 
+				Dir.glob('*').each do |file|
+					bfh = BluetrainFileHelper.new(file)
+
+					# Determine if the file exists remotely, if so PUT else POST
+					unless templates.index(file).nil?
+						@bt_net.update(file, '', bfh.content, 'include')
+					else
+						@bt_net.create(file, '', bfh.content, 'include')
 					end
 				end
 			end	

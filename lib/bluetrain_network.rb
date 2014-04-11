@@ -40,9 +40,9 @@ class BluetrainNetwork
 		{'email' => @user_email, 'token' => @user_token, 'website' => @website}
 	end
 
-	def update (template_name, head_content, body_content)
+	def update (template_name, head_content, body_content, kind)
 		RestClient.put("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['update_plt']}", 
-			{:user_email => @user_email, :user_token => @user_token,"presentation_layer_template"=>{"default"=>false, "kind"=>"template", "notes"=>nil, "title"=>template_name, "website_id"=>@website, "widget_id"=>nil, "default_head_content"=>head_content, "default_body_content"=>body_content}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+			{:user_email => @user_email, :user_token => @user_token,"presentation_layer_template"=>{"default"=>false, "kind"=>kind, "notes"=>nil, "title"=>template_name, "website_id"=>@website, "widget_id"=>nil, "default_head_content"=>head_content, "default_body_content"=>body_content}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
 	end
 
 	def delete (template_name)
@@ -50,14 +50,14 @@ class BluetrainNetwork
 			{:params => {:user_email => @user_email, :user_token => @user_token,"title"=>template_name,"website_id"=>@website}}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
 	end
 
-	def create (template_name, head_content, body_content)
+	def create (template_name, head_content, body_content, kind)
 		RestClient.post("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['create_plt']}", 
-			{:user_email => @user_email, :user_token => @user_token,"presentation_layer_template"=>{"default"=>false, "kind"=>"template", "notes"=>nil, "title"=>template_name, "website_id"=>@website, "widget_id"=>nil, "default_head_content"=> head_content, "default_body_content"=> body_content}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+			{:user_email => @user_email, :user_token => @user_token,"presentation_layer_template"=>{"default"=>false, "kind"=>kind, "notes"=>nil, "title"=>template_name, "website_id"=>@website, "widget_id"=>nil, "default_head_content"=> head_content, "default_body_content"=> body_content}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
 	end
 
 	def get_templates
 		(RestClient.get "#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['get_plt']}",
-			{:params => {:user_email => @user_email, :user_token => @user_token,:website_id => @website}}).to_str
+			{:params => {:user_email => @user_email, :user_token => @user_token,:website_id => @website, :kind=>'all'}}).to_str
 	end
 
 	def get_websites
