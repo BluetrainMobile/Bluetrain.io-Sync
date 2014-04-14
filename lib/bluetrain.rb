@@ -25,25 +25,29 @@ class Bluetrain < Thor
 
 		# Define the listening process
 		listener = Listen.to(directory, polling_fallback_message: false) do |modified, added, removed|
-		  unless modified.empty?
-		  	modified.each do |file| 
-		  		bfh = BluetrainFileHelper.new(file)
-		  		puts file
-		  		@bt_net.update(bfh.name, bfh.head_content, bfh.body_content, bfh.kind)
-		  	end
-		  end
-		  unless added.empty?
-		  	added.each do |file| 
-		  		bfh = BluetrainFileHelper.new(file)
-		  		puts file
-		  		@bt_net.create(bfh.name, bfh.head_content, bfh.body_content, bfh.kind)
-		  	end
-		  end
-		  unless removed.empty?
-		  	removed.each do |file| 
-		  		@bt_net.delete(bfh.name)
-		  	end
-		  end
+		  	begin
+			  unless modified.empty?
+			  	modified.each do |file| 
+			  		bfh = BluetrainFileHelper.new(file)
+			  		puts file
+			  		@bt_net.update(bfh.name, bfh.head_content, bfh.body_content, bfh.kind)
+			  	end
+			  end
+			  unless added.empty?
+			  	added.each do |file| 
+			  		bfh = BluetrainFileHelper.new(file)
+			  		puts file
+			  		@bt_net.create(bfh.name, bfh.head_content, bfh.body_content, bfh.kind)
+			  	end
+			  end
+			  unless removed.empty?
+			  	removed.each do |file| 
+			  		@bt_net.delete(bfh.name)
+			  	end
+			  end
+			rescue
+				puts "An error has occurred with syncing.  Your last change has not been saved."
+			end
 		end
 
 		# Start listening
