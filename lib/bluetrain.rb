@@ -24,7 +24,7 @@ class Bluetrain < Thor
 		connect
 
 		# Define the listening process
-		listener = Listen.to(directory, polling_fallback_message: false) do |modified, added, removed|
+		listener = Listen.to("#{directory}/includes","#{directory}/templates", polling_fallback_message: false) do |modified, added, removed|
 		  	begin
 			  unless modified.empty?
 			  	modified.each do |file| 
