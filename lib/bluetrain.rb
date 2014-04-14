@@ -53,7 +53,13 @@ class Bluetrain < Thor
 		# Start listening
 		puts "Syncing #{directory} up to Bluetrain.io - press ctrl + c to quit"
 		listener.start
-		sleep
+		
+		# Handle ctrl^c gracefully
+		begin
+			sleep
+		rescue SignalException
+			puts "Exiting..."
+		end
 	end
 
 	desc 'pull [DIRECTORY]', 'Pull down all templates from the server (local changes will be overwritten)'
