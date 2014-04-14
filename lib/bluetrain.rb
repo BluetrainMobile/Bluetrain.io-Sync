@@ -6,6 +6,7 @@ class Bluetrain < Thor
 	require 'listen'
 	require 'io/console'
 	require 'json'
+	require 'fileutils'
 
 	# Internal Requirements
 	require 'bluetrain_network'
@@ -63,6 +64,10 @@ class Bluetrain < Thor
 		unless template_json.nil?
 			templates = JSON.parse template_json
 
+			# Create directory structure
+			FileUtils.mkdir_p("#{directory}/templates")
+			FileUtils.mkdir_p("#{directory}/includes")
+
 			# Create a file representing each template
 			templates.each {|template| BluetrainFileHelper.write_template directory, template['presentation_layer_template']}
 		end
@@ -105,9 +110,9 @@ class Bluetrain < Thor
 
 					# Determine if the file exists remotely, if so PUT else POST
 					unless templates.index(file).nil?
-						@bt_net.update(file, '', bfh.body_content, 'include')
+						@bt_net.update(file, bfh.head_content, bfh.body_content, 'include')
 					else
-						@bt_net.create(file, '', bfh.body_content, 'include')
+						@bt_net.create(file, bfh.head_content, bfh.body_content, 'include')
 					end
 				end
 			end	
