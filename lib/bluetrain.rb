@@ -105,7 +105,8 @@ class Bluetrain < Thor
 					bfh = BluetrainFileHelper.new(file)
 
 					# Determine if the file exists remotely, if so PUT else POST
-					unless templates.index(File.basename(file, '.*')).nil?
+					unless (index = templates.index(File.basename(file, '.*'))).nil?
+						templates.delete_at(index)
 						@bt_net.update(File.basename(file, '.*'), bfh.head_content, bfh.body_content, 'template')
 					else
 						@bt_net.create(File.basename(file, '.*'), bfh.head_content, bfh.body_content, 'template')
@@ -119,13 +120,17 @@ class Bluetrain < Thor
 					bfh = BluetrainFileHelper.new(file)
 
 					# Determine if the file exists remotely, if so PUT else POST
-					unless templates.index(file).nil?
+					unless (index = templates.index(file)).nil?
+						templates.delete_at(index)
 						@bt_net.update(file, bfh.head_content, bfh.body_content, 'include')
 					else
 						@bt_net.create(file, bfh.head_content, bfh.body_content, 'include')
 					end
 				end
 			end	
+
+			# Delete removed files
+			templates.each {|template| @bt_net.delete(template)}
 
 			puts 'Push completed.'
 		end
