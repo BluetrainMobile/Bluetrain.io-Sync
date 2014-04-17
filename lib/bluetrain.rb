@@ -102,7 +102,7 @@ class Bluetrain < Thor
 			# For each file in the specified directory (which ends in .html)
 			Dir.chdir("#{directory}/templates") do 
 				Dir.glob('*.html').each do |file|
-					bfh = BluetrainFileHelper.new(file)
+					bfh = BluetrainFileHelper.new(file, 'template')
 
 					# Determine if the file exists remotely, if so PUT else POST
 					unless (index = templates.index(File.basename(file, '.*'))).nil?
@@ -117,7 +117,7 @@ class Bluetrain < Thor
 			# Includes
 			Dir.chdir("#{directory}/includes") do 
 				Dir.glob('*').each do |file|
-					bfh = BluetrainFileHelper.new(file)
+					bfh = BluetrainFileHelper.new(file, 'include')
 
 					# Determine if the file exists remotely, if so PUT else POST
 					unless (index = templates.index(file)).nil?

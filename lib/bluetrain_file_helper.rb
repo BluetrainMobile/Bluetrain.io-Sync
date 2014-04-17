@@ -1,19 +1,18 @@
 class BluetrainFileHelper
 	attr_reader :name, :kind
 
-	def initialize (file_path)
+	def initialize (file_path, kind = nil)
 		@content = File.read(file_path)
 
 		# Determine the 'kind' of resource this document is based on path
 		# Currently support 'kind's are: template, include
-		if /\/includes$/ =~ File.dirname(file_path) 
-			@kind = "include"
-			@name =	File.basename(file_path)
-		else
-			@kind = "template"
-			@name = File.basename(file_path, '.*')
+		if kind.nil?
+			@kind = /\/includes$/ =~ File.dirname(file_path) ? 'include' : 'template'
+		else 
+			@kind = kind
 		end
 
+		@name = @kind.eql?('include') ? File.basename(file_path) : File.basename(file_path, '.*')
 	end
 
 	# Return the content in the <head> tag of a template, or 
