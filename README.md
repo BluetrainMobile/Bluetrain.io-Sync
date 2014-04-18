@@ -3,6 +3,9 @@ Bluetrain.io-Sync
 
 Template sync tool for Bluetrain.io
 
+### Important Note
+The sync tool is not currently running over SSL.  We advise you to use a test account while testing the tool.  SSL will be available for the sync tool very soon.
+
 ### Requirements
 ```
 Ruby 1.9.3
