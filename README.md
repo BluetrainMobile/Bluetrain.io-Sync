@@ -43,7 +43,7 @@ Your initial pull from Bluetrain.io will create a directory with the following s
 The templates directory only recognizes .html files.  The includes folder accepts any type of text based file (CSS, JS, etc).
 
 ### Available Liquid Tags
-Bluetrain.io templates use the Liquid Templating Engine.  The following tags are current available.
+Bluetrain.io templates use the Liquid Templating Engine.  The following tags are current available:
 ```
 {% region id:MyRegion %} <!-- Create a section of the template which is editable in the Page Editor -->
 {% template title:TemplateTitle %} <!-- Write the contents of another template -->
