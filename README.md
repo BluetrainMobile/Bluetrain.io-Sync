@@ -33,19 +33,14 @@ This process will run until you press ctrl^c.  Alternatively, you can push your 
 ```
 In both cases, remote files will be overwritten.  
 
-### Directory Structure
-You can create the following directory structure or run:
-```
-./bluetrain.thor pull *directory* to create it.
-```
-
-OR create a directory with the following sub directories:
+#### Directory Structure
+Your initial pull from Bluetrain.io will create a directory with the following sub directories:
 
 ```
 /templates/
 /includes/
 ```
-The templates directory only recognizes .html files.  The includes folder accepts any type of text based file (CSS, JS, etc)
+The templates directory only recognizes .html files.  The includes folder accepts any type of text based file (CSS, JS, etc).
 
 ### Available Liquid Tags
 Bluetrain.io templates use the Liquid Templating Engine.  The following tags are current available.
