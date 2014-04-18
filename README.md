@@ -4,7 +4,7 @@ Bluetrain.io-Sync
 Template sync tool for Bluetrain.io
 
 ### Important Note
-The sync tool is not currently running over SSL.  We advise you to use a test account while testing the tool.  SSL will be available for the sync tool soon.
+The sync tool is not currently running over SSL.  We advise you to use a test account while testing.  SSL will be available soon.
 
 ### Requirements
 ```
