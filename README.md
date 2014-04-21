@@ -16,6 +16,7 @@ Bundler
 ### Installation
 ```
 git clone git@github.com:BluetrainMobile/Bluetrain.io-Sync.git
+cd Bluetrain.io-Sync
 bundle install
 chmod +x bluetrain.thor
 ./bluetrain.thor
