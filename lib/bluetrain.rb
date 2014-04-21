@@ -14,8 +14,8 @@ class Bluetrain < Thor
 
 	# Configuration
 	require 'yaml'
-	ENV = YAML::load(File.open("./config/config.yml"))
-	SETTINGS = YAML::load(File.open("./config/settings.yml"))
+	ENV = YAML::load(File.open(File.expand_path("../../config/config.yml", __FILE__)))
+	SETTINGS = YAML::load(File.open(File.expand_path("../../config/settings.yml", __FILE__)))
 
 	desc 'sync [DIRECTORY]', 'Begin syncing a directory (remote changes will be overwritten)'
 	def sync (directory)
