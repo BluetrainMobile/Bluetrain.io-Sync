@@ -3,6 +3,9 @@ Bluetrain.io-Sync
 
 Template sync tool for Bluetrain.io
 
+### Important Note
+The sync tool is not currently running over SSL.  We advise you to use a test account while testing.  SSL will be available soon.
+
 ### Requirements
 ```
 Ruby 1.9.3
@@ -13,6 +16,7 @@ Bundler
 ### Installation
 ```
 git clone git@github.com:BluetrainMobile/Bluetrain.io-Sync.git
+cd Bluetrain.io-Sync
 bundle install
 chmod +x bluetrain.thor
 ./bluetrain.thor
@@ -33,22 +37,17 @@ This process will run until you press ctrl^c.  Alternatively, you can push your 
 ```
 In both cases, remote files will be overwritten.  
 
-### Directory Structure
-You can create the following directory structure or run:
-```
-./bluetrain.thor pull *directory* to create it.
-```
-
-OR create a directory with the following sub directories:
+#### Directory Structure
+Your initial pull from Bluetrain.io will create a directory with the following sub directories:
 
 ```
 /templates/
 /includes/
 ```
-The templates directory only recognizes .html files.  The includes folder accepts any type of text based file (CSS, JS, etc)
+The templates directory only recognizes .html files.  The includes folder accepts any type of text based file (CSS, JS, etc).
 
 ### Available Liquid Tags
-Bluetrain.io templates use the Liquid Templating Engine.  The following tags are current available.
+Bluetrain.io templates use the Liquid Templating Engine.  The following tags are current available:
 ```
 {% region id:MyRegion %} <!-- Create a section of the template which is editable in the Page Editor -->
 {% template title:TemplateTitle %} <!-- Write the contents of another template -->
