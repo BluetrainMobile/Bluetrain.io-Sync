@@ -30,14 +30,14 @@ class Bluetrain < Thor
 			  	modified.each do |file| 
 			  		bfh = BluetrainFileHelper.new(file)
 			  		puts file
-			  		@bt_net.update(bfh.name, bfh.head_content, bfh.body_content, bfh.kind)
+			  		@bt_net.update(bfh.name, bfh.content, bfh.kind)
 			  	end
 			  end
 			  unless added.empty?
 			  	added.each do |file| 
 			  		bfh = BluetrainFileHelper.new(file)
 			  		puts file
-			  		@bt_net.create(bfh.name, bfh.head_content, bfh.body_content, bfh.kind)
+			  		@bt_net.create(bfh.name, bfh.content, bfh.kind)
 			  	end
 			  end
 			  unless removed.empty?
@@ -107,9 +107,9 @@ class Bluetrain < Thor
 					# Determine if the file exists remotely, if so PUT else POST
 					unless (index = templates.index(File.basename(file, '.*'))).nil?
 						templates.delete_at(index)
-						@bt_net.update(File.basename(file, '.*'), bfh.head_content, bfh.body_content, 'template')
+						@bt_net.update(File.basename(file, '.*'), bfh.content, 'template')
 					else
-						@bt_net.create(File.basename(file, '.*'), bfh.head_content, bfh.body_content, 'template')
+						@bt_net.create(File.basename(file, '.*'), bfh.content, 'template')
 					end
 				end
 			end	
@@ -122,9 +122,9 @@ class Bluetrain < Thor
 					# Determine if the file exists remotely, if so PUT else POST
 					unless (index = templates.index(file)).nil?
 						templates.delete_at(index)
-						@bt_net.update(file, bfh.head_content, bfh.body_content, 'include')
+						@bt_net.update(file, bfh.content, 'include')
 					else
-						@bt_net.create(file, bfh.head_content, bfh.body_content, 'include')
+						@bt_net.create(file, bfh.content, 'include')
 					end
 				end
 			end	
@@ -154,6 +154,7 @@ class Bluetrain < Thor
 					ask("Password: ")
 				end
 				puts ""
+				
 				if @bt_net.authenticate(user_email, password)
 
 	 				@bt_net.set_website(select_website(@bt_net.get_websites))

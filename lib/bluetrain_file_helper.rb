@@ -1,5 +1,5 @@
 class BluetrainFileHelper
-	attr_reader :name, :kind
+	attr_reader :name, :kind, :content
 
 	def initialize (file_path, kind = nil)
 		@content = File.read(file_path)
@@ -39,12 +39,12 @@ class BluetrainFileHelper
 		case template['kind']
 			when "template" 
 				File.open("#{directory}/templates/#{template['title']}.html", 'w') {|f|
-					f.write("<head>#{template['default_head_content']}</head><body>#{template['default_body_content']}</body>")
+					f.write(template['default_content'])
 				}
 
 			when "include"
 				File.open("#{directory}/includes/#{template['title']}", 'w') {|f|
-					f.write(template['default_body_content'])
+					f.write(template['default_content'])
 				}
 		end			
 	end
