@@ -1,8 +1,8 @@
 development:
- host: localhost
+ host: localhost:3000
 
 production:
- host: api.bluetrain.io
+ host: localhost:3000
 
 paths:
  sign_in: /users/sign_in.json
@@ -11,3 +11,10 @@ paths:
  delete_plt: /presentation_layer_templates
  get_plt: /presentation_layer_templates.json
  get_websites: /users/websites.json
+ get_widgets: /widgets.json
+ create_widget: /widgets.json
+ update_widget: /widgets.json
+ delete_widget: /widgets.json
+ configure_widget: /widgets/configure.json
+ delete_widget_device_template: /widgets/delete_device_template.json
+ get_widget_device_templates: /widgets/device_templates.json
