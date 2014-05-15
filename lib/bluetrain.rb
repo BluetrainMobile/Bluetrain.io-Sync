@@ -53,6 +53,7 @@ class Bluetrain < Thor
 			  			widget_name = File.dirname(file).split('/').last
 
 			  			if bfh.name == "settings.json"
+			  				@bt_net.create_widget widget_name, bfh.content
 			  				@bt_net.configure_widget widget_name, bfh.content
 			  			else
 			  				@bt_net.update_widget(widget_name, bfh.content, bfh.device)
