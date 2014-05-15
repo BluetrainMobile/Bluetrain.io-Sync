@@ -80,7 +80,7 @@ If you want to access the data stored later (in the same view, or in another vie
 
 preview.html defines the content that will be displayed when a user is in the Page Editor or in Browse Mode (prior to publishing).  publish.html contains the content that will be displayed when a user's site has been pushed to production (published).  In the case that the content is the same for both views, you can instead include a default.html file which will be used for both.
 
-For Example: You may wish to have seperate preview and publish files for a form, allowing users to test ibefore publishing their site, but keeping production data seperate.  In the case of an image slider, which behaves the same in production and staging, you can use only the default.html file.
+For Example: You may wish to have seperate preview and publish files for a form, allowing users to test before publishing their site, but keeping production data seperate.  In the case of an image slider, which behaves the same in production and staging, you could choose to only include the default.html file.
 
 ### Available Liquid Tags
 Bluetrain.io templates use the Liquid Templating Engine.  The following tags are current available:
