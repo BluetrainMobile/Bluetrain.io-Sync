@@ -65,6 +65,41 @@ class BluetrainNetwork
 			{:params => {:user_email => @user_email, :user_token => @user_token}}).to_str
 	end
 
+	def get_widgets
+		(RestClient.get "#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['get_widgets']}",
+			{:params => {:user_email => @user_email, :user_token => @user_token, :website_id => @website}}).to_str
+	end
+
+	def update_widget (name, content, device)
+		RestClient.put("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['update_widget']}", 
+			{:user_email => @user_email, :user_token => @user_token,"widget"=>{"website_id"=>@website, "name"=>name}, "device_template"=>{"content" => content, "device" => device}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+	end
+
+	def create_widget (name, content)
+		RestClient.post("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['create_widget']}", 
+			{:user_email => @user_email, :user_token => @user_token,"widget"=>{"website_id"=>@website,"widget_json"=>content, "name"=>name}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+	end
+
+	def delete_widget (name)
+		RestClient.delete("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['delete_widget']}", 
+			{:user_email => @user_email, :user_token => @user_token,"widget"=>{"website_id"=>@website, "name"=>name}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+	end
+
+	def configure_widget (name, settings)
+		RestClient.put("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['configure_widget']}", 
+			{:user_email => @user_email, :user_token => @user_token,"widget"=>{"website_id"=>@website, "name"=>name, "settings"=>settings}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+	end
+
+	def delete_widget_device_template (name, device)
+		RestClient.delete("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['delete_widget_device_template']}", 
+			{:params => {:user_email => @user_email, :user_token => @user_token, "name"=>name, "device"=>device, "website_id"=>@website}}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+	end
+
+	def get_widget_device_templates (name)
+		(RestClient.get "#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['get_widget_device_templates']}",
+			{:params => {:user_email => @user_email, :user_token => @user_token, :website_id => @website, :name => name}}).to_str
+	end
+
 	def self.handle_response (response, request, result, &block)
 		case response.code
 		when 302

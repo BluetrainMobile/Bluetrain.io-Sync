@@ -2,17 +2,25 @@ class BluetrainFileHelper
 	attr_reader :name, :kind, :content
 
 	def initialize (file_path, kind = nil)
-		@content = File.read(file_path)
+		unless kind == 'widget'
+			@content = File.read(file_path)
+		end
 
 		# Determine the 'kind' of resource this document is based on path
 		# Currently support 'kind's are: template, include
 		if kind.nil?
-			@kind = /\/includes$/ =~ File.dirname(file_path) ? 'include' : 'template'
+			if  /\/includes$/ =~ File.dirname(file_path)
+				@kind = 'include'
+			elsif /\/plugins\// =~ File.dirname(file_path)
+				@kind = 'widget'
+			else 
+				@kind = 'template'
+			end
 		else 
 			@kind = kind
 		end
 
-		@name = @kind.eql?('include') ? File.basename(file_path) : File.basename(file_path, '.*')
+		@name = @kind.eql?('template') ? File.basename(file_path, '.*') : File.basename(file_path)
 	end
 
 	# Return the content in the <head> tag of a template, or 
@@ -35,6 +43,24 @@ class BluetrainFileHelper
 		end
 	end
 
+	# Return the device (for widgets) if applicable, otherwise false
+	def device
+		if @kind == "widget"
+			case @name
+				when "preview.html"
+					"preview"
+				when "edit.html"
+					"edit"
+				when "default.html"
+					"default"
+				when "publish.html"
+					"publish"
+			end
+		else
+			false
+		end
+	end
+
 	def self.write_template (directory, template)
 		case template['kind']
 			when "template" 
@@ -46,7 +72,21 @@ class BluetrainFileHelper
 				File.open("#{directory}/includes/#{template['title']}", 'w') {|f|
 					f.write(template['default_content'])
 				}
+
+			# Handle Widgets Seperately
 		end			
 	end
+
+	def self.write_device_template (directory, template)
+		File.open("#{directory}/#{template['device']}.html", 'w') {|f|
+				f.write(template['content'])
+		}
+	end
+
+	def self.write_widget_settings (directory, widget)
+		File.open("#{directory}/plugins/#{widget['name']}/settings.json", 'w') {|f|
+				f.write("{\"enabled\":#{widget['is_enabled']}}")
+		}
+	end		
 
 end

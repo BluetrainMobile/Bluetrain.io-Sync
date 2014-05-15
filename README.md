@@ -43,8 +43,46 @@ Your initial pull from Bluetrain.io will create a directory with the following s
 ```
 /templates/
 /includes/
+/plugins/
 ```
-The templates directory only recognizes .html files.  The includes folder accepts any type of text based file (CSS, JS, etc).
+The templates directory only recognizes .html files.  The includes folder accepts any type of text based file (CSS, JS, etc).  The plugins directory requires a special set of files, which are described in the next section.
+
+### Developing Plugins
+Plugins are setup by creating a sub-directory in the plugins folder.  The name of the folder will be assigned as the plugin name.  The contents of the folder should be one or more of the following files:
+
+```
+settings.json (REQUIRED)
+edit.html (REQUIRED)
+preview.html
+publish.html
+default.html
+```
+
+settings.json consists of a single key/value pair, but will be expanded on.  The value of this key determines if a content editor will see the plugin in the Page Editor:
+
+```
+{"enabled": true}
+```
+
+The edit.html file contains the content for the edit view in the Page Editor.  You can persist data by including an HTML form:
+
+```
+<form>
+<input type='text' name='myvalue'>
+</form>
+```
+
+If you want to access the data stored later (in the same view, or in another view within the same plugin) you can do so using liquid:
+
+```
+{{myvalue}}
+```
+
+preview.html defines the content that will be displayed when a user is in the Page Editor or in Browse Mode (prior to publishing).  publish.html contains the content that will be displayed when a user's site has been pushed to production (published).  In the case that the content is the same for both views, you can instead include a default.html file which will be used for both.
+
+For Example: You may wish to have seperate preview and publish files for a form, allowing users to test before publishing their site, but keeping production data seperate.  In the case of an image slider, which behaves the same in production and staging, you could choose to only include the default.html file.
+
+You can find additional examples here: https://github.com/BluetrainMobile/Bluetrain.io-Plugins
 
 ### Available Liquid Tags
 Bluetrain.io templates use the Liquid Templating Engine.  The following tags are current available:

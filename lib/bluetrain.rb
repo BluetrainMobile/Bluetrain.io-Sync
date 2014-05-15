@@ -24,30 +24,57 @@ class Bluetrain < Thor
 		connect
 
 		# Define the listening process
-		listener = Listen.to("#{directory}/includes","#{directory}/templates", polling_fallback_message: false) do |modified, added, removed|
-		  	begin
+		listener = Listen.to("#{directory}/includes","#{directory}/templates","#{directory}/plugins", polling_fallback_message: false) do |modified, added, removed|
+		#  	begin
 			  unless modified.empty?
 			  	modified.each do |file| 
 			  		bfh = BluetrainFileHelper.new(file)
 			  		puts file
-			  		@bt_net.update(bfh.name, bfh.content, bfh.kind)
+			  		unless /\/plugins\// =~ File.dirname(file)
+			  			@bt_net.update(bfh.name, bfh.content, bfh.kind)
+			  		else
+			  			widget_name = File.dirname(file).split('/').last
+
+			  			if bfh.name == "settings.json"
+			  				@bt_net.configure_widget widget_name, bfh.content
+			  			else
+			  				@bt_net.update_widget(widget_name, bfh.content, bfh.device)
+			  			end
+			  		end
 			  	end
 			  end
 			  unless added.empty?
 			  	added.each do |file| 
 			  		bfh = BluetrainFileHelper.new(file)
 			  		puts file
-			  		@bt_net.create(bfh.name, bfh.content, bfh.kind)
+			  		unless /\/plugins\// =~ File.dirname(file)
+			  			@bt_net.create(bfh.name, bfh.content, bfh.kind)
+			  		else
+			  			widget_name = File.dirname(file).split('/').last
+
+			  			if bfh.name == "settings.json"
+			  				@bt_net.create_widget widget_name, bfh.content
+			  				@bt_net.configure_widget widget_name, bfh.content
+			  			else
+			  				@bt_net.update_widget(widget_name, bfh.content, bfh.device)
+			  			end
+			  		end
 			  	end
 			  end
 			  unless removed.empty?
 			  	removed.each do |file| 
-			  		@bt_net.delete(bfh.name)
+			  		unless  /\/plugins\// =~ File.dirname(file)
+			  			@bt_net.delete(bfh.name)
+			  		else 
+			  			bfh = BluetrainFileHelper.new(file, 'widget')
+			  			widget_name = File.dirname(file).split('/').last
+			  			@bt_net.delete_widget_device_template(widget_name, bfh.device)
+			  		end
 			  	end
 			  end
-			rescue
-				puts "An error has occurred with syncing.  Your last change has not been saved."
-			end
+			#rescue
+			#	puts "An error has occurred with syncing.  Your last change has not been saved."
+			#end
 		end
 
 		# Start listening
@@ -68,18 +95,34 @@ class Bluetrain < Thor
 		# Connect to Bluetrain.io
 		connect
 
+		# Create directory structure
+		FileUtils.mkdir_p("#{directory}/templates")
+		FileUtils.mkdir_p("#{directory}/includes")
+		FileUtils.mkdir_p("#{directory}/plugins")
+
 		# Get a list of remote templates
 		template_json = @bt_net.get_templates
+		widget_json = @bt_net.get_widgets
 
 		unless template_json.nil?
 			templates = JSON.parse template_json
 
-			# Create directory structure
-			FileUtils.mkdir_p("#{directory}/templates")
-			FileUtils.mkdir_p("#{directory}/includes")
-
 			# Create a file representing each template
 			templates.each {|template| BluetrainFileHelper.write_template directory, template['presentation_layer_template']}
+		end
+
+		unless widget_json.nil?
+			widgets = JSON.parse widget_json
+
+			widgets.each do |widget|
+				widget = widget["widget"]
+				FileUtils.mkdir_p("#{directory}/plugins/#{widget['name']}")
+				BluetrainFileHelper.write_widget_settings(directory, widget)
+				device_templates = JSON.parse @bt_net.get_widget_device_templates(widget['name'])
+				device_templates.each do |device_template|
+					BluetrainFileHelper.write_device_template("#{directory}/plugins/#{widget['name']}", device_template['device_template'])
+				end
+			end
 		end
 	end
 
@@ -91,11 +134,19 @@ class Bluetrain < Thor
 
 		# Get a list of remote templates
 		template_json = @bt_net.get_templates
+		widget_json = @bt_net.get_widgets
 
-		unless template_json.nil?
+		unless template_json.nil? || widget_json.nil?
 
 			# Create an array of template titles
 			templates = JSON.parse template_json
+			widgets = JSON.parse widget_json
+
+			# Widget templates can share the names of other templates, filter them out
+			widgets.collect! {|widget| widget['widget']['name']}
+			widget_templates = templates.select {|template| template['presentation_layer_template']['widget_id'] != nil}
+			widget_templates.collect! {|template| template['presentation_layer_template']['title']}
+			templates.select! {|template| template['presentation_layer_template']['widget_id'] == nil}
 			templates.collect! {|template| template['presentation_layer_template']['title']}
 
 			# Templates
@@ -129,8 +180,37 @@ class Bluetrain < Thor
 				end
 			end	
 
+			# Widgets
+			Dir.chdir("#{directory}/plugins") do
+				Dir.glob('*').each do |folder|
+					device_templates = ['default', 'preview', 'publish', 'edit']
+					Dir.chdir(folder) do
+						# Push Settings
+						bfh = BluetrainFileHelper.new('settings.json', 'widget')
+						if (index = widgets.index(folder)).nil?
+							@bt_net.create_widget folder, bfh.content
+						end
+						@bt_net.configure_widget folder, bfh.content
+
+						# Push Templates
+						Dir.glob('*').each do |file|
+							unless file == "settings.json"
+								bfh = BluetrainFileHelper.new(file, 'widget')
+								@bt_net.update_widget(folder, bfh.content, bfh.device)
+								device_templates.delete(bfh.device)
+							end
+						end
+
+						device_templates.each do |dt|
+							@bt_net.delete_widget_device_template(folder, dt)
+						end
+					end
+				end
+			end
+
 			# Delete removed files
-			templates.each {|template| @bt_net.delete(template)}
+			#templates.each {|template| @bt_net.delete(template)}
+			#widget_templates.each {|template| @bt_net.delete(template)}
 
 			puts 'Push completed.'
 		end
