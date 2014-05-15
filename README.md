@@ -82,6 +82,8 @@ preview.html defines the content that will be displayed when a user is in the Pa
 
 For Example: You may wish to have seperate preview and publish files for a form, allowing users to test before publishing their site, but keeping production data seperate.  In the case of an image slider, which behaves the same in production and staging, you could choose to only include the default.html file.
 
+You can find additional examples here: https://github.com/BluetrainMobile/Bluetrain.io-Plugins
+
 ### Available Liquid Tags
 Bluetrain.io templates use the Liquid Templating Engine.  The following tags are current available:
 ```
