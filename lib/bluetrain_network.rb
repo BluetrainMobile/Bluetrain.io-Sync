@@ -47,7 +47,7 @@ class BluetrainNetwork
 
 	def delete (template_name)
 		RestClient.delete("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['update_plt']}",
-			{:params => {:user_email => @user_email, :user_token => @user_token,"title"=>template_name,"website_id"=>@website}}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+			{:params => {:user_email => @user_email, :user_token => @user_token,'presentation_layer_template[title]' => template_name,'presentation_layer_template[website_id]' => @website,  'presentation_layer_template[kind]' => 'template'}}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
 	end
 
 	def create (template_name, content, kind)

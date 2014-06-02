@@ -3,7 +3,13 @@ class BluetrainFileHelper
 
 	def initialize (file_path, kind = nil)
 		unless kind == 'widget'
-			@content = File.read(file_path)
+
+      # Catch errors reading content for deleted files
+      begin
+			 @content = File.read(file_path)
+      rescue
+        
+      end
 		end
 
 		# Determine the 'kind' of resource this document is based on path

@@ -64,6 +64,7 @@ class Bluetrain < Thor
 			  unless removed.empty?
 			  	removed.each do |file| 
 			  		unless  /\/plugins\// =~ File.dirname(file)
+			  			bfh = BluetrainFileHelper.new(file)
 			  			@bt_net.delete(bfh.name)
 			  		else 
 			  			bfh = BluetrainFileHelper.new(file, 'widget')
@@ -188,7 +189,7 @@ class Bluetrain < Thor
 						# Push Settings
 						bfh = BluetrainFileHelper.new('settings.json', 'widget')
 						if (index = widgets.index(folder)).nil?
-							@bt_net.create_widget folder, bfh.content
+							@bt_net.create_widget folder, File.read('settings.json')
 						end
 						@bt_net.configure_widget folder, bfh.content
 
