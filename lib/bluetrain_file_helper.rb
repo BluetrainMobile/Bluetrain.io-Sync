@@ -2,15 +2,13 @@ class BluetrainFileHelper
 	attr_reader :name, :kind, :content
 
 	def initialize (file_path, kind = nil)
-		unless kind == 'widget'
 
-      # Catch errors reading content for deleted files
-      begin
-			 @content = File.read(file_path)
-      rescue
-        
-      end
-		end
+    # Catch errors reading content for deleted files
+    begin
+		 @content = File.read(file_path)
+    rescue
+      
+    end
 
 		# Determine the 'kind' of resource this document is based on path
 		# Currently support 'kind's are: template, include
