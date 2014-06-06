@@ -1,8 +1,8 @@
 development:
- host: localhost:3000
+ host: api.bluetrain.io
 
 production:
- host: localhost:3000
+ host: api.bluetrain.io
 
 paths:
  sign_in: /users/sign_in.json
