@@ -187,8 +187,8 @@ class Bluetrain < Thor
 					device_templates = ['default', 'preview', 'publish', 'edit']
 					Dir.chdir(folder) do
 						# Push Settings
-						bfh = BluetrainFileHelper.new('settings.json', 'widget')
-						if (index = widgets.index(folder)).nil?
+						bfh = BluetrainFileHelper.new('settings.json')
+						if widgets.index(folder).nil?
 							@bt_net.create_widget folder, File.read('settings.json')
 						end
 						@bt_net.configure_widget folder, bfh.content
