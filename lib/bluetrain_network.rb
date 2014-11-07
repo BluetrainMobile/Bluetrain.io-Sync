@@ -5,13 +5,20 @@ class BluetrainNetwork
 		@env = env
 		@logger = Logger.new("net.log")
 		RestClient.log = @logger
+		@ssl_config = {
+			:ssl_client_cert => OpenSSL::X509::Certificate.new(File.read("cert/client.crt")),
+			:ssl_client_key => OpenSSL::PKey::RSA.new(File.read("cert/client.key")),
+			:ssl_ca_file => "cert/ca_certificate.crt",
+			:verify_ssl => OpenSSL::SSL::VERIFY_PEER
+		}
 	end
 
 	def authenticate (user, password)
 		@logger.info "Authenticating: Silencing log"
 		RestClient.log = nil
 
-		response = RestClient.post "#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['sign_in']}", {:user=>{:email => user, :password => password}}
+		client = rest_client_for('sign_in')
+		response = client.post(:user => { :email => user, :password => password })
 		response = JSON.load response
 		result = false
 
@@ -36,68 +43,68 @@ class BluetrainNetwork
 		@website = website
 	end
 
-	def get_auth_settings 
+	def get_auth_settings
 		{'email' => @user_email, 'token' => @user_token, 'website' => @website}
 	end
 
 	def update (template_name, content, kind)
-		RestClient.put("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['update_plt']}", 
-			{:user_email => @user_email, :user_token => @user_token,"presentation_layer_template"=>{"default"=>false, "kind"=>kind, "notes"=>nil, "title"=>template_name, "website_id"=>@website, "widget_id"=>nil, "default_content"=>content}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+		client = rest_client_for('update_plt')
+		client.put({:user_email => @user_email, :user_token => @user_token,"presentation_layer_template"=>{"default"=>false, "kind"=>kind, "notes"=>nil, "title"=>template_name, "website_id"=>@website, "widget_id"=>nil, "default_content"=>content}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
 	end
 
 	def delete (template_name)
-		RestClient.delete("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['update_plt']}",
-			{:params => {:user_email => @user_email, :user_token => @user_token,'presentation_layer_template[title]' => template_name,'presentation_layer_template[website_id]' => @website,  'presentation_layer_template[kind]' => 'template'}}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+		client = rest_client_for('update_plt')
+		client.delete(:params => {:user_email => @user_email, :user_token => @user_token,'presentation_layer_template[title]' => template_name,'presentation_layer_template[website_id]' => @website,  'presentation_layer_template[kind]' => 'template'}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
 	end
 
 	def create (template_name, content, kind)
-		RestClient.post("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['create_plt']}", 
-			{:user_email => @user_email, :user_token => @user_token,"presentation_layer_template"=>{"default"=>false, "kind"=>kind, "notes"=>nil, "title"=>template_name, "website_id"=>@website, "widget_id"=>nil, "default_content"=>content}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+		client = rest_client_for('create_plt')
+		client.post({:user_email => @user_email, :user_token => @user_token,"presentation_layer_template"=>{"default"=>false, "kind"=>kind, "notes"=>nil, "title"=>template_name, "website_id"=>@website, "widget_id"=>nil, "default_content"=>content}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
 	end
 
 	def get_templates
-		(RestClient.get "#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['get_plt']}",
-			{:params => {:user_email => @user_email, :user_token => @user_token,:website_id => @website, :kind=>'all'}}).to_str
+		client = rest_client_for('get_plt')
+		client.get({:params => {:user_email => @user_email, :user_token => @user_token,:website_id => @website, :kind=>'all'}}).to_str
 	end
 
 	def get_websites
-		(RestClient.get "#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['get_websites']}",
-			{:params => {:user_email => @user_email, :user_token => @user_token}}).to_str
+		client = rest_client_for('get_websites')
+		client.get(:params => {:user_email => @user_email, :user_token => @user_token}).to_str
 	end
 
 	def get_widgets
-		(RestClient.get "#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['get_widgets']}",
-			{:params => {:user_email => @user_email, :user_token => @user_token, :website_id => @website}}).to_str
+		client = rest_client_for('get_widgets')
+		client.get(:params => {:user_email => @user_email, :user_token => @user_token, :website_id => @website}).to_str
 	end
 
 	def update_widget (name, content, device)
-		RestClient.put("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['update_widget']}", 
-			{:user_email => @user_email, :user_token => @user_token,"widget"=>{"website_id"=>@website, "name"=>name}, "device_template"=>{"content" => content, "device" => device}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+		client = rest_client_for('update_widget')
+		client.put(:user_email => @user_email, :user_token => @user_token,"widget"=>{"website_id"=>@website, "name"=>name}, "device_template"=>{"content" => content, "device" => device}, "website_id"=>@website){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
 	end
 
 	def create_widget (name, content)
-		RestClient.post("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['create_widget']}", 
-			{:user_email => @user_email, :user_token => @user_token,"widget"=>{"website_id"=>@website,"widget_json"=>content, "name"=>name}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+		client = rest_client_for('create_widget')
+		client.post(:user_email => @user_email, :user_token => @user_token,"widget"=>{"website_id"=>@website,"widget_json"=>content, "name"=>name}, "website_id"=>@website){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
 	end
 
 	def delete_widget (name)
-		RestClient.delete("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['delete_widget']}", 
-			{:user_email => @user_email, :user_token => @user_token,"widget"=>{"website_id"=>@website, "name"=>name}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+		client = rest_client_for('delete_widget')
+		client.delete(:user_email => @user_email, :user_token => @user_token,"widget"=>{"website_id"=>@website, "name"=>name}, "website_id"=>@website){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
 	end
 
 	def configure_widget (name, settings)
-		RestClient.put("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['configure_widget']}", 
-			{:user_email => @user_email, :user_token => @user_token,"widget"=>{"website_id"=>@website, "name"=>name, "settings"=>settings}, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+		client = rest_client_for('configure_widget')
+		client.put(:user_email => @user_email, :user_token => @user_token,"widget"=>{"website_id"=>@website, "name"=>name, "settings"=>settings}, "website_id"=>@website){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
 	end
 
 	def delete_widget_device_template (name, device)
-		RestClient.delete("#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['delete_widget_device_template']}", 
-			{:params => {:user_email => @user_email, :user_token => @user_token, "name"=>name, "device"=>device, "website_id"=>@website}}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
+		client = rest_client_for('delete_widget_device_template')
+		client.delete(:params => {:user_email => @user_email, :user_token => @user_token, "name"=>name, "device"=>device, "website_id"=>@website}){|response, request, result, &block| BluetrainNetwork.handle_response(response, request, result, &block)}
 	end
 
 	def get_widget_device_templates (name)
-		(RestClient.get "#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths']['get_widget_device_templates']}",
-			{:params => {:user_email => @user_email, :user_token => @user_token, :website_id => @website, :name => name}}).to_str
+		client = rest_client_for('get_widget_device_templates')
+		client.get(:params => { :user_email => @user_email, :user_token => @user_token, :website_id => @website, :name => name }).to_str
 	end
 
 	def self.handle_response (response, request, result, &block)
@@ -109,5 +116,15 @@ class BluetrainNetwork
 		else 
 			response.return!(request, result, &block) 
 		end
+	end
+
+	private
+
+	def path_for(route)
+		"#{Bluetrain::ENV[@env]['host']}#{Bluetrain::ENV['paths'][route]}"
+	end
+
+	def rest_client_for(route)
+		RestClient::Resource.new(path_for(route), @ssl_config)
 	end
 end
